@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>financial-statement-analysis · 财务报表分析大师</title>
+<style>
+  :root{
+    --bg:#f4f6fb; --card:#ffffff; --ink:#1f2329; --sub:#5b6573;
+    --line:#e6e9ef; --accent:#0f766e; --accent-soft:#e8f4f1;
+    --teal:#0d9488; --amber:#d97706; --red:#dc2626;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.65;padding:32px 16px}
+  .wrap{max-width:960px;margin:0 auto}
+
+  /* 顶部 */
+  header{background:linear-gradient(135deg,#0f5132,#0f766e);color:#fff;border-radius:18px;
+    padding:38px 32px;box-shadow:0 12px 32px rgba(15,118,110,.22);position:relative;overflow:hidden}
+  header::before{content:"";position:absolute;top:-40px;right:-40px;width:180px;height:180px;
+    background:rgba(255,255,255,.08);border-radius:50%}
+  header .tag{display:inline-block;font-size:11.5px;letter-spacing:.6px;background:rgba(255,255,255,.18);
+    padding:4px 12px;border-radius:20px;margin-bottom:12px;text-transform:uppercase}
+  header h1{font-size:28px;margin-bottom:10px;letter-spacing:-.3px}
+  header p{opacity:.92;font-size:14.5px;max-width:560px}
+  .quote{margin-top:18px;padding:14px 20px;background:rgba(255,255,255,.12);
+    border-radius:12px;font-size:13.5px;font-style:italic;border-left:3px solid #a7f3d0;line-height:1.7}
+
+  /* 卡片 */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+    padding:26px 28px;margin-top:22px;box-shadow:0 2px 8px rgba(0,0,0,.04);transition:transform .2s,box-shadow .2s}
+  .card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.07)}
+  .card h2{font-size:17px;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+  .card h2::before{content:"";width:4px;height:18px;background:var(--accent);border-radius:4px}
+
+  /* 标签云 */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+  .chip{background:var(--accent-soft);border:1px solid #cfe9e3;color:#0d5b52;
+    border-radius:12px;padding:11px 14px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px}
+  .chip::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent)}
+
+  /* 表格 */
+  table{width:100%;border-collapse:collapse;font-size:13px;margin-top:4px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--sub);font-weight:600;background:#f8fafc}
+  tr:hover td{background:#fafbfc}
+  code{background:#f1f3f7;padding:2px 7px;border-radius:6px;font-size:12px;font-family:"SFMono-Regular",Consolas,monospace;border:1px solid #e6e9ef}
+
+  /* 触发场景 */
+  .trig{display:grid;grid-template-columns:1fr 2fr;gap:10px 18px;font-size:13px}
+  .trig .req{font-weight:700;color:var(--ink);background:#f8fafc;border-radius:8px;padding:8px 12px;border:1px solid var(--line)}
+  .trig .focus{color:var(--sub);padding:8px 0}
+
+  /* 步骤 */
+  ol.steps{counter-reset:s;list-style:none}
+  ol.steps li{counter-increment:s;position:relative;padding:9px 0 9px 38px;font-size:13.5px;color:var(--sub);
+    border-bottom:1px dashed var(--line);transition:background .15s}
+  ol.steps li:last-child{border-bottom:none}
+  ol.steps li::before{content:counter(s);position:absolute;left:0;top:7px;width:26px;height:26px;
+    background:var(--accent);color:#fff;border-radius:50%;text-align:center;line-height:26px;font-size:13px;font-weight:800}
+  ol.steps li:hover{background:#fafbfc;border-radius:6px}
+
+  /* 双栏 */
+  .twocol{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .twocol .box{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:16px 18px;transition:box-shadow .2s}
+  .twocol .box:hover{box-shadow:0 4px 12px rgba(0,0,0,.06)}
+  .box h3{font-size:13px;margin-bottom:8px;color:var(--ink);display:flex;align-items:center;gap:6px}
+  .box h3::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--accent)}
+  .box p{font-size:12.5px;color:var(--sub)}
+
+  /* 统计条 */
+  .statbar{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px}
+  .statbar .pill{background:#f1f3f7;border:1px solid var(--line);border-radius:20px;
+    padding:5px 13px;font-size:12px;color:var(--sub);font-weight:600}
+  .statbar .pill b{color:var(--ink)}
+
+  /* 文件列表 */
+  .filelist{font-size:13px;color:var(--sub)}
+  .filelist b{color:var(--ink)}
+
+  /* 底部 */
+  footer{text-align:center;color:#9aa3b0;font-size:12px;margin-top:28px}
+
+  @media(max-width:640px){.trig{grid-template-columns:1fr}.twocol{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <span class="tag">FINANCIAL ANALYSIS · AGENT SKILL</span>
+    <h1>财务报表分析大师</h1>
+    <p>基于清华大学出版社《财务报告分析（微课版）》系统化知识体系的财务分析 Skill</p>
+    <div class="quote">像侦探一样阅读报表——不只计算比率，更要理解数字背后的商业故事。财务报告是企业的体检报告，分析是从数据还原真相的过程。</div>
+  </header>
+
+  <section class="card">
+    <h2>能力概览</h2>
+    <div class="grid">
+      <div class="chip">四表逐项解读</div>
+      <div class="chip">四大能力评价</div>
+      <div class="chip">杜邦 / 沃尔评分</div>
+      <div class="chip">平衡计分卡</div>
+      <div class="chip">财务危机预警</div>
+      <div class="chip">财务造假识别</div>
+      <div class="chip">标准化报告生成</div>
+      <div class="chip">同业对比分析</div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>知识体系：四篇十二章</h2>
+    <table>
+      <tr><th style="width:130px">篇</th><th style="width:150px">章节</th><th>核心内容</th></tr>
+      <tr>
+        <td rowspan="2">第一篇<br>基础</td>
+        <td>第1章 概述</td><td>财务报告构成、编制目的、六大分析主体与目标、五大分析目的</td>
+      </tr>
+      <tr><td>第2章 程序与方法</td><td>四阶段程序；水平/垂直/趋势/比率/因素/图解分析法</td></tr>
+      <tr>
+        <td rowspan="4">第二篇<br>报表解读</td>
+        <td>第3章 资产负债表</td><td>水平+垂直分析、资产/负债/权益项目分析、趋势分析</td>
+      </tr>
+      <tr><td>第4章 利润表</td><td>综合+项目（收入/成本/利润各层）+ 趋势分析</td></tr>
+      <tr><td>第5章 现金流量表</td><td>综合/结构/趋势/组合分析、利润与现金差异</td></tr>
+      <tr><td>第6章 所有者权益变动表</td><td>一般+项目分析、权益变动对财务状况质量影响</td></tr>
+      <tr>
+        <td rowspan="4">第三篇<br>能力分析</td>
+        <td>第7章 营运能力</td><td>流动资产管理、固定资产效率、总资产营运能力</td>
+      </tr>
+      <tr><td>第8章 盈利能力</td><td>资本/资产/商品经营、上市公司特殊指标</td></tr>
+      <tr><td>第9章 偿债能力</td><td>短期偿债能力、长期偿债能力</td></tr>
+      <tr><td>第10章 发展能力</td><td>营业/财务发展能力、商誉竞争力</td></tr>
+      <tr>
+        <td rowspan="2">第四篇<br>综合与预警</td>
+        <td>第11章 综合分析与业绩评价</td><td>杜邦分析、帕利普分析、沃尔评分、平衡计分卡</td>
+      </tr>
+      <tr><td>第12章 财务危机预警</td><td>定性方法 + 定量模型（Z-score / Logistic 等）</td></tr>
+    </table>
+    <div class="statbar">
+      <div class="pill"><b>4</b> 篇</div>
+      <div class="pill"><b>12</b> 章</div>
+      <div class="pill"><b>462</b> 千字</div>
+      <div class="pill"><b>1035</b> 行 SKILL.md</div>
+    </div>
+    <p class="filelist" style="margin-top:12px"><b>知识来源：</b>《财务报告分析（微课版）》，郭苏敬主编，清华大学出版社，2022 年 3 月第 1 版，ISBN 978-7-302-59891-6。</p>
+  </section>
+
+  <section class="card">
+    <h2>典型触发场景</h2>
+    <div class="trig">
+      <div class="req">"分析一下××公司的财务状况"</div><div class="focus">完整五阶段分析，以综合结论为导向</div>
+      <div class="req">"××公司的 ROE 怎么样？做杜邦分解"</div><div class="focus">盈利能力 + 杜邦分析 + 因素分析法</div>
+      <div class="req">"这家公司偿债能力有问题吗？"</div><div class="focus">短期+长期偿债，重点看经营现金流动负债比</div>
+      <div class="req">"帮我看看有没有财务造假迹象"</div><div class="focus">利润质量 + 异常比率波动 + 关联交易 + 审计意见</div>
+      <div class="req">"对比××和××两家公司"</div><div class="focus">核心比率横向对比 + 杜邦分解差异驱动</div>
+      <div class="req">"用 Z-score 算一下破产风险"</div><div class="focus">Z-score 计算 + 判定区间 + 多年度趋势</div>
+      <div class="req">"给这家公司做一个沃尔评分"</div><div class="focus">选定比率→赋权→标准值→计算→判定</div>
+      <div class="req">"帮我看一下这公司的营运效率"</div><div class="focus">存货/应收/应付周转 + 营运周期 + 现金周期</div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>标准报告模板（七段式）</h2>
+    <ol class="steps">
+      <li>分析背景与目的</li>
+      <li>企业概况与行业环境</li>
+      <li>财务报表解读（四表）</li>
+      <li>财务能力评价（营运/盈利/偿债/发展）</li>
+      <li>综合分析（杜邦 / 沃尔 / 同业对比）</li>
+      <li>风险提示与财务预警</li>
+      <li>结论与建议</li>
+    </ol>
+  </section>
+
+  <section class="card">
+    <h2>关键分析原则</h2>
+    <div class="twocol">
+      <div class="box"><h3>数据质量第一</h3><p>先验证报表口径、合并范围、会计政策一致性，再做比率计算。</p></div>
+      <div class="box"><h3>警惕盈余管理</h3><p>关注非经常性损益、收入确认时点、减值计提与转回等信号。</p></div>
+      <div class="box"><h3>现金流为锚</h3><p>利润需与经营活动现金流交叉验证，避免"纸面富贵"。</p></div>
+      <div class="box"><h3>结合行业与生命周期</h3><p>比率必须放在行业可比区间和企业所处阶段中判断。</p></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>目录结构</h2>
+    <p class="filelist">
+      <b>SKILL.md</b> — 主入口：知识体系、分析方法、报告模板、触发指南（1035 行）<br>
+      <b>references/ratio-formulas.md</b> — 财务比率公式速查手册（营运/盈利/偿债/发展/综合）<br>
+      <b>references/case-studies.md</b> — 实战案例库（如格力 vs 美的 vs 海尔对比分析）
+    </p>
+    <div class="statbar">
+      <div class="pill"><b>2</b> 篇参考文档</div>
+      <div class="pill"><b>123</b> 行案例库</div>
+      <div class="pill"><b>224</b> 行公式手册</div>
+    </div>
+  </section>
+
+  <footer>financial-statement-analysis Skill · 配套 README.md 提供简明说明 · 由 WorkBuddy 生成</footer>
+</div>
+</body>
+</html>
